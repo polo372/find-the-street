@@ -14,7 +14,7 @@ import { createProgress, deleteProgress, updateProgress } from "./progress";
 import * as turf from "@turf/turf";
 
 const options = {
-  maxTurns: 3,
+  maxTurns: 10,
   maxTime: 45,
 };
 let score = 0;
