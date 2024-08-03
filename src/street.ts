@@ -709,7 +709,7 @@ const streets: Street[] = [
       [47.39487, 0.69389],
       [47.39464, 0.69396],
     ],
-    type: "Landmark",
+    type: "landmark",
   },
   {
     name: "Place Nicolas Frumeaud",
