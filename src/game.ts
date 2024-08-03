@@ -2,6 +2,7 @@ import {
   latLng,
   LatLng,
   latLngBounds,
+  LeafletMouseEvent,
   Map,
   marker,
   polygon,
@@ -131,9 +132,11 @@ const checkAnswer = (
   if (!event) {
     displayTimeoutTurnResult();
   } else if (street) {
+    displayClickPoint(event, map);
     const latlng = event.latlng;
-    const isCorrect = checkIfCorrect(latlng, street, map);
+    // const isCorrect = checkIfCorrect(latlng, street, map);
     const distance = calculateDistanceToStreetOrLandmark(latlng, street, map);
+    const isCorrect = distance <= 50;
     const points = calculatePoints(distance, isCorrect);
     score += points;
     displayTurnResult(isCorrect, distance);
@@ -147,6 +150,10 @@ const checkAnswer = (
       displayNextQuestion();
     }
   }
+};
+
+const displayClickPoint = (event: LeafletMouseEvent, map: Map) => {
+  marker(event.latlng).addTo(map);
 };
 
 const displayTimeoutTurnResult = (): void => {
@@ -199,42 +206,19 @@ const displayFinalScore = () => {
   document.getElementById("app")?.append(finalScore);
 };
 
-const checkIfCorrect = (latlng: LatLng, street: Street, map: Map) => {
-  if (street.type === "landmark") {
-    return isPointInPolygon(latlng, street.path);
-  } else {
-    const nearestPoint = findNearestPointOnPolyline(latlng, street.path, map);
-    if (!nearestPoint) {
-      console.log(`nearestPoint not found`);
-      return false;
-    }
-    const distance = map.distance(latlng, nearestPoint);
-    return distance <= 50;
-  }
-};
-
-const isPointInPolygon = (point: LatLng, polygonPoints: [number, number][]) => {
-  const latlngs = polygonPoints.map((coord) => latLng(coord));
-  const poly = polygon(latlngs);
-  return poly.getBounds().contains(point);
-};
-
-const findNearestPointOnPolyline = (
-  latlng: LatLng,
-  path: [number, number][],
-  map: Map
-): [number, number] | null => {
-  let nearestPoint = null;
-  let nearestDistance = Infinity;
-  path.forEach((point) => {
-    const distance = map.distance(latlng, point);
-    if (distance < nearestDistance) {
-      nearestPoint = point;
-      nearestDistance = distance;
-    }
-  });
-  return nearestPoint;
-};
+// const checkIfCorrect = (latlng: LatLng, street: Street, map: Map) => {
+//   if (street.type === "landmark") {
+//     return isPointInPolygon(latlng, street.path);
+//   } else {
+//     const nearestPoint = findNearestPointOnPolyline(latlng, street.path, map);
+//     if (!nearestPoint) {
+//       console.log(`nearestPoint not found`);
+//       return false;
+//     }
+//     const distance = map.distance(latlng, nearestPoint);
+//     return distance <= 50;
+//   }
+// };
 
 const showCorrectPosition = (street: Street, map: Map) => {
   drawStreet(street, map);
@@ -274,10 +258,18 @@ const calculateDistanceToStreetOrLandmark = (
   map: Map
 ) => {
   if (street.type === "landmark") {
-    return calculateDistanceToPolygon(latlng, street.path, map);
+    return isPointInPolygon(latlng, street.path)
+      ? 0
+      : calculateDistanceToPolygon(latlng, street.path, map);
   } else {
     return calculateDistanceToPolyline(latlng, street.path, map);
   }
+};
+
+const isPointInPolygon = (point: LatLng, polygonPoints: [number, number][]) => {
+  const latlngs = polygonPoints.map((coord) => latLng(coord));
+  const poly = polygon(latlngs);
+  return poly.getBounds().contains(point);
 };
 
 const calculateDistanceToPolygon = (
