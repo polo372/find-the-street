@@ -101,7 +101,7 @@ const deleteStreet = (): void => {
   document.getElementById("street")?.remove();
 };
 
-const startTimer = (map: Map, street: Street): number => {
+const startTimer = (map: Map, street: Street): NodeJS.Timeout => {
   deleteTimer();
   let timeLeft = options.maxTime;
   const timer = document.createElement("div");
