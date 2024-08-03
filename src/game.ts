@@ -9,24 +9,33 @@ import {
   polyline,
 } from "leaflet";
 import { createMap, deleteMap } from "./map";
-import { getRandomStreets, Street } from "./street";
+import { getRandomStreets, initializeStreetForCity, Street } from "./street";
 import { createProgress, deleteProgress, updateProgress } from "./progress";
 import * as turf from "@turf/turf";
 
 const options = {
   maxTurns: 10,
   maxTime: 45,
+  city: "Tours",
+  lat: 47.3936,
+  long: 0.6848,
 };
 let score = 0;
 let streetsToFind: Street[] = [];
 
-export const startGame = (): void => {
+export const startGame = async (): Promise<void> => {
   // Initialize game variables
   score = 0;
   streetsToFind = [];
 
-  deleteScore();
   deleteStartButton();
+  await initializeStreetForCity(options.city);
+  // TODO : Voir pour trouver le centre de la carte correctement
+  // const [lat, long] = await getCenterMapFromCity(options.city);
+  // options.lat = lat;
+  // options.long = long;
+  console.log(options);
+  deleteScore();
   deleteFinalScore();
 
   streetsToFind = getRandomStreets(options.maxTurns);
@@ -54,7 +63,7 @@ const nextTurn = (): void => {
   const street = streetsToFind.shift();
   if (street) {
     displayStreet(street);
-    const map = createMap();
+    const map = createMap(options.lat, options.long);
     const timer = startTimer(map, street);
     map.on("dblclick", (event) => {
       map.off("dblclick");
@@ -283,7 +292,6 @@ const calculateDistanceToPolyline = (
   point: [number, number],
   lineCoordinates: [number, number][]
 ) => {
-  console.log(point, lineCoordinates);
   const pointGeoJSON = turf.point(point);
   const lineGeoJSON = turf.lineString(lineCoordinates);
 
