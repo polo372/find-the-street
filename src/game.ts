@@ -11,9 +11,10 @@ import {
 import { createMap, deleteMap } from "./map";
 import { getRandomStreets, Street } from "./street";
 import { createProgress, deleteProgress, updateProgress } from "./progress";
+import * as turf from "@turf/turf";
 
 const options = {
-  maxTurns: 3,
+  maxTurns: 10,
   maxTime: 45,
 };
 let score = 0;
@@ -206,20 +207,6 @@ const displayFinalScore = () => {
   document.getElementById("app")?.append(finalScore);
 };
 
-// const checkIfCorrect = (latlng: LatLng, street: Street, map: Map) => {
-//   if (street.type === "landmark") {
-//     return isPointInPolygon(latlng, street.path);
-//   } else {
-//     const nearestPoint = findNearestPointOnPolyline(latlng, street.path, map);
-//     if (!nearestPoint) {
-//       console.log(`nearestPoint not found`);
-//       return false;
-//     }
-//     const distance = map.distance(latlng, nearestPoint);
-//     return distance <= 50;
-//   }
-// };
-
 const showCorrectPosition = (street: Street, map: Map) => {
   drawStreet(street, map);
   if (street.type === "landmark") {
@@ -262,7 +249,7 @@ const calculateDistanceToStreetOrLandmark = (
       ? 0
       : calculateDistanceToPolygon(latlng, street.path, map);
   } else {
-    return calculateDistanceToPolyline(latlng, street.path, map);
+    return calculateDistanceToPolyline([latlng.lat, latlng.lng], street.path);
   }
 };
 
@@ -288,25 +275,26 @@ const calculateDistanceToPolygon = (
 };
 
 const calculateDistanceToPolyline = (
-  point: LatLng,
-  polyline: [number, number][],
-  map: Map
+  point: [number, number],
+  lineCoordinates: [number, number][]
 ) => {
-  let minDistance = Infinity;
-  polyline.forEach((coord) => {
-    const distance = map.distance(point, latLng(coord));
-    if (distance < minDistance) {
-      minDistance = distance;
-    }
+  console.log(point, lineCoordinates);
+  const pointGeoJSON = turf.point(point);
+  const lineGeoJSON = turf.lineString(lineCoordinates);
+
+  const distance = turf.pointToLineDistance(pointGeoJSON, lineGeoJSON, {
+    units: "meters",
   });
-  return minDistance;
+
+  return distance;
 };
 
 const calculatePoints = (distance: number, isCorrect: boolean) => {
-  if (isCorrect) return 10;
-  if (distance <= 50) return 8;
-  if (distance <= 100) return 5;
-  if (distance <= 150) return 3;
-  if (distance <= 200) return 1;
-  return 0;
+  const maxPoints = 100;
+  if (isCorrect) return maxPoints;
+  if (distance > 750) {
+    return 0;
+  }
+  const points = Math.round(maxPoints * (1 - distance / 750));
+  return points;
 };
