@@ -55,6 +55,7 @@ const nextTurn = (): void => {
     const map = createMap();
     const timer = startTimer(map, street);
     map.on("dblclick", (event) => {
+      map.off("dblclick");
       clearInterval(timer);
       checkAnswer(map, street, event);
     });
