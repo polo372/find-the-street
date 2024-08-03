@@ -9,6 +9,7 @@ import {
 } from "leaflet";
 import { createMap, deleteMap } from "./map";
 import { getRandomStreets, Street } from "./street";
+import { createProgress, deleteProgress, updateProgress } from "./progress";
 
 const options = {
   maxTurns: 3,
@@ -26,6 +27,7 @@ export const startGame = (): void => {
   deleteStartButton();
 
   streetsToFind = getRandomStreets(options.maxTurns);
+  createProgress();
   nextTurn();
 };
 
@@ -70,6 +72,7 @@ export const endGame = (): void => {
   deleteStreet();
   deleteTimer();
   deleteTurnResult();
+  deleteProgress();
   displayFinalScore();
   createStartButton();
 };
@@ -88,7 +91,7 @@ const deleteScore = (): void => {
 const displayStreet = (street: Street): void => {
   deleteStreet();
   const streetDiv = document.createElement("div");
-  streetDiv.innerHTML = `Chercher: ${street.name}`;
+  streetDiv.innerHTML = `Chercher: <span>${street.name}</span>`;
   streetDiv.setAttribute("id", "street");
   document.getElementById("app")?.append(streetDiv);
 };
@@ -136,6 +139,7 @@ const checkAnswer = (
   }
   if (street) {
     showCorrectPosition(street, map);
+    updateProgress(options.maxTurns - streetsToFind.length, options.maxTurns);
     if (streetsToFind.length === 0) {
       displayEndGame();
     } else {

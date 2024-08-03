@@ -19,7 +19,8 @@ a:hover {
 body {
   margin: 0;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -30,7 +31,15 @@ h1 {
 }
 @media screen and (width <=600px) {
   h1 {
-    font-size: 2em;
+    font-size: 1.5em;
+  }
+
+  #street > span {
+    font-size: 1.3rem;
+  }
+
+  #timer {
+    font-size: 1.3rem;
   }
 }
 
@@ -62,4 +71,59 @@ button:focus-visible {
 #map {
   width: 90vw;
   height: 70vh;
+}
+
+#street > span {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+#timer {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 1rem 0;
+}
+
+.progress-container {
+  position: relative;
+  width: 80%;
+  height: 100px;
+  margin: 20px auto;
+  display: flex;
+  align-items: center;
+}
+
+.progress-bar {
+  position: relative;
+  flex: 1;
+  height: 15px;
+  background-color: #f2f2f2;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.fire-truck {
+  position: absolute;
+  left: 0;
+  top: calc(50% - 10px);
+  transform: translateY(-50%);
+  width: 70px;
+  height: 70px;
+  background-image: url("rescue.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  transition: left 0.5s ease-in-out;
+}
+
+.fire {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  right: -10px;
+  top: 10px;
+  background-image: url("fire.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-left: 10px;
 }
