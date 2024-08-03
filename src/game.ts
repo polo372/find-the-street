@@ -14,7 +14,7 @@ import { createProgress, deleteProgress, updateProgress } from "./progress";
 import * as turf from "@turf/turf";
 
 const options = {
-  maxTurns: 10,
+  maxTurns: 3,
   maxTime: 45,
 };
 let score = 0;
@@ -27,6 +27,7 @@ export const startGame = (): void => {
 
   deleteScore();
   deleteStartButton();
+  deleteFinalScore();
 
   streetsToFind = getRandomStreets(options.maxTurns);
   createProgress();
@@ -46,7 +47,6 @@ const deleteStartButton = (): void => {
 
 const nextTurn = (): void => {
   deleteStreet();
-  deleteScore();
   deleteMap();
   deleteTimer();
   deleteTurnResult();
@@ -76,6 +76,7 @@ export const endGame = (): void => {
   deleteTimer();
   deleteTurnResult();
   deleteProgress();
+  deleteScore();
   displayFinalScore();
   createStartButton();
 };
@@ -144,6 +145,7 @@ const checkAnswer = (
   }
   if (street) {
     showCorrectPosition(street, map);
+    displayScore();
     updateProgress(options.maxTurns - streetsToFind.length, options.maxTurns);
     if (streetsToFind.length === 0) {
       displayEndGame();
@@ -202,9 +204,12 @@ const displayNextQuestion = () => {
 
 const displayFinalScore = () => {
   const finalScore = document.createElement("div");
-  finalScore.setAttribute("id", "score");
+  finalScore.setAttribute("id", "finalScore");
   finalScore.innerHTML = `Votre score final est de ${score} points`;
   document.getElementById("app")?.append(finalScore);
+};
+const deleteFinalScore = () => {
+  document.getElementById("finalScore")?.remove();
 };
 
 const showCorrectPosition = (street: Street, map: Map) => {
