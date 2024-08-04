@@ -9,7 +9,12 @@ import {
   polyline,
 } from "leaflet";
 import { createMap, deleteMap } from "./map";
-import { getRandomStreets, initializeStreetForCity, Street } from "./street";
+import {
+  getCenterMapPoint,
+  getRandomStreets,
+  initializeStreetForCity,
+  Street,
+} from "./street";
 import { createProgress, deleteProgress, updateProgress } from "./progress";
 import * as turf from "@turf/turf";
 
@@ -17,8 +22,8 @@ const options = {
   maxTurns: 10,
   maxTime: 45,
   city: "Tours",
-  lat: 47.3936,
-  long: 0.6848,
+  lat: 0,
+  long: 0,
 };
 let score = 0;
 let streetsToFind: Street[] = [];
@@ -30,15 +35,21 @@ export const startGame = async (): Promise<void> => {
 
   deleteStartButton();
   await initializeStreetForCity(options.city);
-  // TODO : Voir pour trouver le centre de la carte correctement
-  // const [lat, long] = await getCenterMapFromCity(options.city);
-  // options.lat = lat;
-  // options.long = long;
-  console.log(options);
+  streetsToFind = getRandomStreets(options.maxTurns);
+
+  const polygonPoints = getCenterMapPoint(streetsToFind);
+  if (!polygonPoints) {
+    console.error("No polygon points found");
+    alert("Erreur lors de la récupération des rues");
+    return;
+  }
+  const center = getPolygonCenter(polygonPoints);
+  options.lat = center.lat;
+  options.long = center.lng;
+
   deleteScore();
   deleteFinalScore();
 
-  streetsToFind = getRandomStreets(options.maxTurns);
   createProgress();
   nextTurn();
 };

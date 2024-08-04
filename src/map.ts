@@ -26,35 +26,3 @@ const setupMap = (
   ).addTo(map);
   return map;
 };
-
-export const getCenterMapFromCity = async (
-  city: string
-): Promise<[number, number]> => {
-  const query = `
-  [out:json];
-area[name="${city}"][admin_level=8]->.searchArea;
-relation(area.searchArea);
-out bb;
-`;
-  const overpassUrl = `https://overpass-api.de/api/interpreter`;
-
-  const response = await fetch(overpassUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: `data=${encodeURIComponent(query)}`,
-  });
-  const data = await response.json();
-
-  const bounds = data.elements[0].bounds as {
-    minlat: number;
-    minlon: number;
-    maxlat: number;
-    maxlon: number;
-  };
-  return [
-    (bounds.minlat + bounds.maxlat) / 2,
-    (bounds.minlon + bounds.maxlon) / 2,
-  ];
-};
