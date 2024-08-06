@@ -1,22 +1,21 @@
+import { Map } from "leaflet";
 import {
-  latLng,
-  LatLng,
-  latLngBounds,
-  LeafletMouseEvent,
-  Map,
-  marker,
-  polygon,
-  polyline,
-} from "leaflet";
-import { createMap, deleteMap } from "./map";
+  calculateDistanceToStreetOrLandmark,
+  createMap,
+  deleteMap,
+  displayClickPoint,
+  drawStreet,
+  getPolygonCenter,
+} from "./map";
 import {
+  deleteStreet,
+  displayStreet,
   getCenterMapPoint,
   getRandomStreets,
   initializeStreetForCity,
   Street,
 } from "./street";
 import { createProgress, deleteProgress, updateProgress } from "./progress";
-import * as turf from "@turf/turf";
 
 const options = {
   maxTurns: 10,
@@ -112,17 +111,6 @@ const deleteScore = (): void => {
   document.getElementById("score")?.remove();
 };
 
-const displayStreet = (street: Street): void => {
-  deleteStreet();
-  const streetDiv = document.createElement("div");
-  streetDiv.innerHTML = `Chercher: <span>${street.name}</span>`;
-  streetDiv.setAttribute("id", "street");
-  document.getElementById("app")?.append(streetDiv);
-};
-const deleteStreet = (): void => {
-  document.getElementById("street")?.remove();
-};
-
 const startTimer = (map: Map, street: Street): NodeJS.Timeout => {
   deleteTimer();
   let timeLeft = options.maxTime;
@@ -173,10 +161,6 @@ const checkAnswer = (
       displayNextQuestion();
     }
   }
-};
-
-const displayClickPoint = (event: LeafletMouseEvent, map: Map) => {
-  marker(event.latlng).addTo(map);
 };
 
 const displayTimeoutTurnResult = (): void => {
@@ -234,83 +218,6 @@ const deleteFinalScore = () => {
 
 const showCorrectPosition = (street: Street, map: Map) => {
   drawStreet(street, map);
-  if (street.type === "landmark") {
-    marker(getPolygonCenter(street.path))
-      .addTo(map)
-      .bindPopup(`Position correcte: ${street.name}`)
-      .openPopup();
-  } else {
-    const midpointIndex = Math.floor(street.path.length / 2);
-    const midpoint = street.path[midpointIndex];
-    marker(midpoint)
-      .addTo(map)
-      .bindPopup(`Position correcte: ${street.name}`)
-      .openPopup();
-  }
-};
-
-const drawStreet = (street: Street, map: Map) => {
-  if (street.type === "landmark") {
-    // Afficher un polygone pour l'empreinte géographique
-    polygon(street.path, { color: "red" }).addTo(map);
-  } else {
-    // Afficher une polyline pour une rue
-    polyline(street.path, { color: "red" }).addTo(map);
-  }
-};
-
-const getPolygonCenter = (polygonPoints: [number, number][]): LatLng => {
-  const bounds = latLngBounds(polygonPoints);
-  return bounds.getCenter();
-};
-
-const calculateDistanceToStreetOrLandmark = (
-  latlng: LatLng,
-  street: Street,
-  map: Map
-) => {
-  if (street.type === "landmark") {
-    return isPointInPolygon(latlng, street.path)
-      ? 0
-      : calculateDistanceToPolygon(latlng, street.path, map);
-  } else {
-    return calculateDistanceToPolyline([latlng.lat, latlng.lng], street.path);
-  }
-};
-
-const isPointInPolygon = (point: LatLng, polygonPoints: [number, number][]) => {
-  const latlngs = polygonPoints.map((coord) => latLng(coord));
-  const poly = polygon(latlngs);
-  return poly.getBounds().contains(point);
-};
-
-const calculateDistanceToPolygon = (
-  point: LatLng,
-  polygon: [number, number][],
-  map: Map
-) => {
-  let minDistance = Infinity;
-  polygon.forEach((coord) => {
-    const distance = map.distance(point, latLng(coord));
-    if (distance < minDistance) {
-      minDistance = distance;
-    }
-  });
-  return minDistance;
-};
-
-const calculateDistanceToPolyline = (
-  point: [number, number],
-  lineCoordinates: [number, number][]
-) => {
-  const pointGeoJSON = turf.point(point);
-  const lineGeoJSON = turf.lineString(lineCoordinates);
-
-  const distance = turf.pointToLineDistance(pointGeoJSON, lineGeoJSON, {
-    units: "meters",
-  });
-
-  return distance;
 };
 
 const calculatePoints = (distance: number, isCorrect: boolean) => {

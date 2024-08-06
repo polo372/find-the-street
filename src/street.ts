@@ -107,6 +107,17 @@ export const getRandomStreets = (count: number): Street[] => {
   return Array.from(selectedStreets);
 };
 
+export const displayStreet = (street: Street): void => {
+  deleteStreet();
+  const streetDiv = document.createElement("div");
+  streetDiv.innerHTML = `Chercher: <span>${street.name}</span>`;
+  streetDiv.setAttribute("id", "street");
+  document.getElementById("app")?.append(streetDiv);
+};
+export const deleteStreet = (): void => {
+  document.getElementById("street")?.remove();
+};
+
 export const getCenterMapPoint = (
   streets: Street[]
 ): [number, number][] | null => {
