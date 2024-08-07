@@ -20,7 +20,7 @@ import { createProgress, deleteProgress, updateProgress } from "./progress";
 const options = {
   maxTurns: 10,
   maxTime: 45,
-  city: "Tours",
+  firehouseName: "Ouest Agglo",
   lat: 0,
   long: 0,
 };
@@ -33,8 +33,9 @@ export const startGame = async (): Promise<void> => {
   streetsToFind = [];
 
   deleteStartButton();
-  await initializeStreetForCity(options.city);
+  await initializeStreetForCity(options.firehouseName);
   streetsToFind = getRandomStreets(options.maxTurns);
+  console.log(streetsToFind);
 
   const polygonPoints = getCenterMapPoint(streetsToFind);
   if (!polygonPoints) {

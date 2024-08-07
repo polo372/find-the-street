@@ -1,4 +1,5 @@
 import { latLngBounds } from "leaflet";
+import firehouses from "./assets/firehouses.json";
 
 export type Street = {
   name: string;
@@ -16,45 +17,49 @@ export type Bounds = {
 
 let streets: Street[] = [];
 
-export const initializeStreetForCity = async (city: string): Promise<void> => {
+export const initializeStreetForCity = async (
+  firehouseName: string
+): Promise<void> => {
+  const firehousePolygon = firehouses.find(
+    (firehouse: { name: string; polygon: string }) =>
+      firehouse.name === firehouseName
+  )?.polygon;
   const query = `
   [out:json];
-area[name="${city}"][admin_level=8]->.searchArea;
 (
-  // Highways
-  way["highway"="primary"](area.searchArea);
-  way["highway"="secondary"](area.searchArea);
-  way["highway"="tertiary"](area.searchArea);
+  way["highway"="primary"](poly: "${firehousePolygon}");
+  way["highway"="secondary"](poly: "${firehousePolygon}");
+  way["highway"="tertiary"](poly: "${firehousePolygon}");
 
   // Mairie
-  node["amenity"="townhall"](area.searchArea);
-  way["amenity"="townhall"](area.searchArea);
-  relation["amenity"="townhall"](area.searchArea);
+  node["amenity"="townhall"](poly: "${firehousePolygon}");
+  way["amenity"="townhall"](poly: "${firehousePolygon}");
+  relation["amenity"="townhall"](poly: "${firehousePolygon}");
 
   // Palais de justice
-  node["amenity"="courthouse"](area.searchArea);
-  way["amenity"="courthouse"](area.searchArea);
-  relation["amenity"="courthouse"](area.searchArea);
+  node["amenity"="courthouse"](poly: "${firehousePolygon}");
+  way["amenity"="courthouse"](poly: "${firehousePolygon}");
+  relation["amenity"="courthouse"](poly: "${firehousePolygon}");
 
   // Cathédrale
-  node["building"="cathedral"](area.searchArea);
-  way["building"="cathedral"](area.searchArea);
-  relation["building"="cathedral"](area.searchArea);
+  node["building"="cathedral"](poly: "${firehousePolygon}");
+  way["building"="cathedral"](poly: "${firehousePolygon}");
+  relation["building"="cathedral"](poly: "${firehousePolygon}");
 
   // Hôpitaux
-  node["amenity"="hospital"](area.searchArea);
-  way["amenity"="hospital"](area.searchArea);
-  relation["amenity"="hospital"](area.searchArea);
+  node["amenity"="hospital"](poly: "${firehousePolygon}");
+  way["amenity"="hospital"](poly: "${firehousePolygon}");
+  relation["amenity"="hospital"](poly: "${firehousePolygon}");
 
   // Cinémas
-  node["amenity"="cinema"](area.searchArea);
-  way["amenity"="cinema"](area.searchArea);
-  relation["amenity"="cinema"](area.searchArea);
+  node["amenity"="cinema"](poly: "${firehousePolygon}");
+  way["amenity"="cinema"](poly: "${firehousePolygon}");
+  relation["amenity"="cinema"](poly: "${firehousePolygon}");
 
   // Gares
-  node["railway"="station"](area.searchArea);
-  way["railway"="station"](area.searchArea);
-  relation["railway"="station"](area.searchArea);
+  node["railway"="station"](poly: "${firehousePolygon}");
+  way["railway"="station"](poly: "${firehousePolygon}");
+  relation["railway"="station"](poly: "${firehousePolygon}");
 );
 out geom;
 `;
