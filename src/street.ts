@@ -1,11 +1,13 @@
 import { latLngBounds } from "leaflet";
 import firehouses from "./assets/firehouses.json";
+import { isPolylineWithinPolygon } from "./map";
 
 export type Street = {
   name: string;
   path: [number, number][];
   type: "street" | "landmark";
   bounds: Bounds;
+  cityName?: string;
 };
 
 export type Bounds = {
@@ -15,7 +17,7 @@ export type Bounds = {
   minlon: number;
 };
 
-let streets: Street[] = [];
+export let streets: Street[] = [];
 
 export const initializeStreetForCity = async (
   firehouseName: string
@@ -60,8 +62,13 @@ export const initializeStreetForCity = async (
   node["railway"="station"](poly: "${firehousePolygon}");
   way["railway"="station"](poly: "${firehousePolygon}");
   relation["railway"="station"](poly: "${firehousePolygon}");
+
+  // Administrative boundaries (city) within the polygon
+  relation["boundary"="administrative"]["admin_level"="8"](poly: "${firehousePolygon}");
 );
-out geom;
+out body geom;
+>;
+out skel qt;
 `;
   const overpassUrl = `https://overpass-api.de/api/interpreter`;
 
@@ -75,22 +82,46 @@ out geom;
   const data = await response.json();
   const streetMap = new Map<string, Street>();
 
+  const cities: { name: string; path: [number, number][] }[] = data.elements
+    .filter((element: any) => element.type === "relation")
+    .filter((element: any) => element.tags.name && element.members)
+    .map((element: any) => ({
+      name: element.tags.name,
+      path: element.members
+        .filter((member: any) => member.type === "way")
+        .flatMap((member: any) => member.geometry)
+        .map((coord: any) => [coord.lat, coord.lon]),
+    }));
+
   data.elements
-    .filter((element: any) => !!element.tags.name)
+    .filter((element: any) => element.type !== "relation")
     .filter((element: any) => element.geometry)
+    .filter((element: any) => !!element.tags.name)
     .forEach((element: any) => {
       const type = element.type;
       const name = element.tags.name;
       const bounds = element.bounds;
       const path = element.geometry.map((coord: any) => [coord.lat, coord.lon]);
-      if (streetMap.has(name)) {
-        streetMap.get(name)!.path.push(...path);
+
+      const cityName =
+        cities.find((city) => isPolylineWithinPolygon(path, city.path))?.name ??
+        "";
+
+      // Sans le nom de la ville je ne prend pas la rue
+      if (cityName === "") return;
+
+      // Combine the name of the street with the city name
+      const uniqueName = `${name}, ${cityName}`;
+
+      if (streetMap.has(uniqueName)) {
+        streetMap.get(uniqueName)!.path.push(...path);
       } else {
-        streetMap.set(name, {
+        streetMap.set(uniqueName, {
           name: name,
           path: path,
           type: type === "way" ? "street" : "landmark",
           bounds,
+          cityName: cityName,
         });
       }
     });
@@ -115,7 +146,7 @@ export const getRandomStreets = (count: number): Street[] => {
 export const displayStreet = (street: Street): void => {
   deleteStreet();
   const streetDiv = document.createElement("div");
-  streetDiv.innerHTML = `Chercher: <span>${street.name}</span>`;
+  streetDiv.innerHTML = `<span>${street.name}, ${street.cityName}</span>`;
   streetDiv.setAttribute("id", "street");
   document.getElementById("app")?.append(streetDiv);
 };

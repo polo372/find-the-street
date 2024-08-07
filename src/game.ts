@@ -20,7 +20,7 @@ import { createProgress, deleteProgress, updateProgress } from "./progress";
 const options = {
   maxTurns: 10,
   maxTime: 45,
-  firehouseName: "Ouest Agglo",
+  firehouseName: "Tours centre",
   lat: 0,
   long: 0,
 };
@@ -40,7 +40,9 @@ export const startGame = async (): Promise<void> => {
   const polygonPoints = getCenterMapPoint(streetsToFind);
   if (!polygonPoints) {
     console.error("No polygon points found");
-    alert("Erreur lors de la récupération des rues");
+    alert(
+      "Erreur lors de la récupération des rues, veuillez réessayer plus tard"
+    );
     return;
   }
   const center = getPolygonCenter(polygonPoints);
@@ -145,7 +147,6 @@ const checkAnswer = (
   } else if (street) {
     displayClickPoint(event, map);
     const latlng = event.latlng;
-    // const isCorrect = checkIfCorrect(latlng, street, map);
     const distance = calculateDistanceToStreetOrLandmark(latlng, street, map);
     const isCorrect = distance <= 50;
     const points = calculatePoints(distance, isCorrect);

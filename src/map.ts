@@ -77,9 +77,24 @@ export const isPointInPolygon = (
   point: LatLng,
   polygonPoints: [number, number][]
 ) => {
-  const latlngs = polygonPoints.map((coord) => latLng(coord));
-  const poly = polygon(latlngs);
-  return poly.getBounds().contains(point);
+  // Turf a besoin d'une boucle fermée
+  polygonPoints.push(polygonPoints[0]);
+  const polylineGeoJSON = turf.point([point.lng, point.lat]);
+  const polygonGeoJSON = turf.polygon([polygonPoints]);
+
+  return turf.booleanWithin(polylineGeoJSON, polygonGeoJSON);
+};
+
+export const isPolylineWithinPolygon = (
+  polyline: [number, number][],
+  polygonPoints: [number, number][]
+) => {
+  // Turf a besoin d'une boucle fermée
+  polygonPoints.push(polygonPoints[0]);
+  const polylineGeoJSON = turf.lineString(polyline);
+  const polygonGeoJSON = turf.polygon([polygonPoints]);
+
+  return turf.booleanWithin(polylineGeoJSON, polygonGeoJSON);
 };
 
 export const calculateDistanceToPolygon = (
