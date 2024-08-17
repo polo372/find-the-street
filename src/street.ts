@@ -22,6 +22,7 @@ export let streets: Street[] = [];
 export const initializeStreetForCity = async (
   firehouseName: string
 ): Promise<void> => {
+  if (streets.length) return;
   const firehousePolygon = firehouses.find(
     (firehouse: { name: string; polygon: string }) =>
       firehouse.name === firehouseName
