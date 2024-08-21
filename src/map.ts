@@ -16,7 +16,7 @@ import { Street } from "./street";
 export const createMap = (lat: number, long: number): L.Map => {
   const map = document.createElement("div");
   map.setAttribute("id", "map");
-  document.getElementById("app")?.append(map);
+  document.getElementById("mapZone")?.append(map);
   return setupMap(map, lat, long);
 };
 

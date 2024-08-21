@@ -1,8 +1,7 @@
 import { startGame } from "./game.ts";
 import "./style.css";
 
-document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-  <h1>Trouve ma rue!</h1>
+document.getElementById("banner")!.innerHTML = `
   <button id="startGame">Démarrer le jeu</button>
 `;
 

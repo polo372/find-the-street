@@ -60,7 +60,7 @@ const createStartButton = (): void => {
   const startButton = document.createElement("button");
   startButton.innerHTML = "Démarrer le jeu";
   startButton.setAttribute("id", "startGame");
-  document.getElementById("app")?.append(startButton);
+  document.getElementById("banner")?.append(startButton);
   startButton.addEventListener("click", () => startGame());
 };
 const deleteStartButton = (): void => {
@@ -108,7 +108,7 @@ export const displayScore = () => {
   const scoreDiv = document.createElement("div");
   scoreDiv.innerHTML = `Score: ${score}`;
   scoreDiv.setAttribute("id", "score");
-  document.getElementById("app")?.append(scoreDiv);
+  document.getElementById("banner")?.append(scoreDiv);
 };
 const deleteScore = (): void => {
   document.getElementById("score")?.remove();
@@ -120,7 +120,7 @@ const startTimer = (map: Map, street: Street): NodeJS.Timeout => {
   const timer = document.createElement("div");
   timer.innerHTML = `Temps restant: ${timeLeft}`;
   timer.setAttribute("id", "timer");
-  document.getElementById("app")?.append(timer);
+  document.getElementById("banner")?.append(timer);
 
   const interval = setInterval(() => {
     timeLeft--;
@@ -170,7 +170,7 @@ const displayTimeoutTurnResult = (): void => {
   const result = document.createElement("div");
   result.setAttribute("id", "result");
   result.innerHTML = "Temps écoulé!";
-  document.getElementById("app")?.append(result);
+  document.getElementById("banner")?.append(result);
 };
 const displayTurnResult = (isCorrect: boolean, distance: number): void => {
   deleteTurnResult();
@@ -183,14 +183,14 @@ const displayTurnResult = (isCorrect: boolean, distance: number): void => {
       distance
     )} mètres d'ici.`;
   }
-  document.getElementById("app")?.append(result);
+  document.getElementById("banner")?.append(result);
 };
 
 const displayEndGame = () => {
   const endGameButton = document.createElement("button");
   endGameButton.innerHTML = "Terminer le jeu";
   endGameButton.setAttribute("id", "endGame");
-  document.getElementById("app")?.append(endGameButton);
+  document.getElementById("banner")?.append(endGameButton);
   endGameButton.addEventListener("click", () => {
     endGameButton.remove();
     endGame();
@@ -201,9 +201,10 @@ const displayNextQuestion = () => {
   const nextButton = document.createElement("button");
   nextButton.innerHTML = "Continuer avec la rue suivante";
   nextButton.setAttribute("id", "nextQuestion");
-  document.getElementById("app")?.append(nextButton);
+  document.getElementById("banner")?.append(nextButton);
   nextButton.addEventListener("click", () => {
     nextButton.remove();
+    deleteScore();
     nextTurn();
   });
 };
@@ -212,7 +213,7 @@ const displayFinalScore = () => {
   const finalScore = document.createElement("div");
   finalScore.setAttribute("id", "finalScore");
   finalScore.innerHTML = `Votre score final est de ${score} points`;
-  document.getElementById("app")?.append(finalScore);
+  document.getElementById("banner")?.append(finalScore);
 };
 const deleteFinalScore = () => {
   document.getElementById("finalScore")?.remove();
