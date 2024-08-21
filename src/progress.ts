@@ -15,7 +15,7 @@ export const createProgress = (): void => {
   progressContainer.appendChild(fire);
   progressContainer.appendChild(fireTruck);
 
-  document.body.appendChild(progressContainer);
+  document.getElementById("progressZone")?.appendChild(progressContainer);
 };
 
 export const deleteProgress = (): void => {

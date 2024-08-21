@@ -26,26 +26,13 @@ body {
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-@media screen and (width <=600px) {
-  h1 {
-    font-size: 1.5em;
+  font-size: 1.2em;
+  line-height: 1;
+  margin: 0;
+  margin-bottom: 10px;
+  @media screen and (width <=600px) {
+    font-size: 0.8rem;
   }
-
-  #street > span {
-    font-size: 1.3rem;
-  }
-
-  #timer {
-    font-size: 1.3rem;
-  }
-}
-
-#app {
-  padding: 2rem;
-  text-align: center;
 }
 
 button {
@@ -59,6 +46,9 @@ button {
   color: rgba(255, 255, 255, 0.87);
   cursor: pointer;
   transition: border-color 0.25s;
+  @media screen and (width > 600px) {
+    grid-column: span 2;
+  }
 }
 button:hover {
   border-color: #646cff;
@@ -68,27 +58,51 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+#banner {
+  display: grid;
+  grid-gap: 5px;
+  grid-template-columns: 1fr 1fr;
+  justify-items: center;
+  align-items: baseline;
+  @media screen and (width <=600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
 #map {
-  width: 90vw;
-  height: 70vh;
+  width: 99vw;
+  height: 75vh;
 }
 
 #street > span {
-  font-size: 2.5rem;
+  font-size: 2.1rem;
   font-weight: 700;
+
+  @media screen and (width <=600px) {
+    font-size: 1.3rem;
+  }
 }
 
 #timer {
-  font-size: 2.5rem;
+  font-size: 1.7rem;
   font-weight: 700;
   margin: 1rem 0;
+  @media screen and (width <=600px) {
+    font-size: 1rem;
+  }
+}
+
+@media screen and (width > 600px) {
+  #finalScore {
+    grid-column: span 2;
+  }
 }
 
 .progress-container {
   position: relative;
   width: 80%;
   height: 100px;
-  margin: 20px auto;
+  margin: 0 auto;
   display: flex;
   align-items: center;
 }

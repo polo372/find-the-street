@@ -149,7 +149,7 @@ export const displayStreet = (street: Street): void => {
   const streetDiv = document.createElement("div");
   streetDiv.innerHTML = `<span>${street.name}, ${street.cityName}</span>`;
   streetDiv.setAttribute("id", "street");
-  document.getElementById("app")?.append(streetDiv);
+  document.getElementById("banner")?.append(streetDiv);
 };
 export const deleteStreet = (): void => {
   document.getElementById("street")?.remove();
