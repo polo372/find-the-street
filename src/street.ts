@@ -4,7 +4,7 @@ import { isPolylineWithinPolygon } from "./map";
 
 export type Street = {
   name: string;
-  path: [number, number][];
+  path: [number, number][][];
   type: "street" | "landmark";
   bounds: Bounds;
   cityName?: string;
@@ -115,11 +115,17 @@ out skel qt;
       const type = element.type;
       const name = element.tags.name;
       const bounds = element.bounds;
-      const path = element.geometry.map((coord: any) => [coord.lat, coord.lon]);
+      const segment = element.geometry.map((coord: any) => [
+        coord.lat,
+        coord.lon,
+      ]);
 
+      // Check if the segment is within any city
+      // We need to check if *this segment* is inside the city.
+      // Note: isPolylineWithinPolygon expects a single line string.
       const cityName =
-        cities.find((city) => isPolylineWithinPolygon(path, city.path))?.name ??
-        "";
+        cities.find((city) => isPolylineWithinPolygon(segment, city.path))
+          ?.name ?? "";
 
       // Sans le nom de la ville je ne prend pas la rue
       if (cityName === "") return;
@@ -128,11 +134,11 @@ out skel qt;
       const uniqueName = `${name}, ${cityName}`;
 
       if (streetMap.has(uniqueName)) {
-        streetMap.get(uniqueName)!.path.push(...path);
+        streetMap.get(uniqueName)!.path.push(segment);
       } else {
         streetMap.set(uniqueName, {
           name: name,
-          path: path,
+          path: [segment],
           type: type === "way" ? "street" : "landmark",
           bounds,
           cityName: cityName,

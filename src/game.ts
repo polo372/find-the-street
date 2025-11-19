@@ -25,20 +25,25 @@ const options = {
   firehouseName: "Tours centre",
   lat: 0,
   long: 0,
+  difficulty: "medium",
 };
 let score = 0;
 let streetsToFind: Street[] = [];
 
-export const startGame = async (firehouseName: string): Promise<void> => {
+export const startGame = async (
+  firehouseName: string,
+  difficulty: string
+): Promise<void> => {
   // Initialize game variables
   score = 0;
   streetsToFind = [];
   options.firehouseName = firehouseName;
-
-  options.firehouseName = firehouseName;
+  options.difficulty = difficulty;
 
   clearStreets();
-  await initializeStreetForCity(options.firehouseName);
+  document.getElementById("loading")?.classList.remove("hidden");
+  await initializeStreetForCity(options.firehouseName, options.difficulty);
+  document.getElementById("loading")?.classList.add("hidden");
   streetsToFind = getRandomStreets(options.maxTurns);
   console.log(streetsToFind);
 

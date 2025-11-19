@@ -45,13 +45,31 @@ export const displayClickPoint = (event: LeafletMouseEvent, map: Map) => {
   marker(event.latlng).addTo(map);
 };
 export const drawStreet = (street: Street, map: Map) => {
-  (street.type === "landmark"
-    ? polygon(street.path, { color: "red" })
-    : polyline(street.path, { color: "red" })
-  )
-    .addTo(map)
-    .bindPopup(`Position correcte: ${street.name}`)
-    .openPopup();
+  street.path.forEach((segment) => {
+    (street.type === "landmark"
+      ? polygon(segment, { color: "red" })
+      : polyline(segment, { color: "red" })
+    ).addTo(map);
+  });
+
+  // Bind popup to the first segment or a central marker?
+  // For simplicity, let's just add a marker at the center of the first segment for the popup
+  // or just attach it to the last added shape.
+  // Better: just show the popup on the first segment.
+  const firstSegment = street.path[0];
+  if (firstSegment) {
+    // We don't need to add it again, but we need a reference to open popup.
+    // Actually, let's just use a marker for the popup to be clean.
+    // Or simply bind to the first segment drawn.
+    // Let's keep it simple:
+    // The loop above adds all segments.
+    // We can just open a popup at the center of the first segment.
+    const center = latLngBounds(firstSegment).getCenter();
+    marker(center, { opacity: 0 }) // Invisible marker for popup
+      .addTo(map)
+      .bindPopup(`Position correcte: ${street.name}`)
+      .openPopup();
+  }
 };
 
 export const getPolygonCenter = (polygonPoints: [number, number][]): LatLng => {
@@ -64,13 +82,23 @@ export const calculateDistanceToStreetOrLandmark = (
   street: Street,
   map: Map
 ) => {
-  if (street.type === "landmark") {
-    return isPointInPolygon(latlng, street.path)
-      ? 0
-      : calculateDistanceToPolygon(latlng, street.path, map);
-  } else {
-    return calculateDistanceToPolyline([latlng.lat, latlng.lng], street.path);
-  }
+  let minDistance = Infinity;
+
+  street.path.forEach((segment) => {
+    let distance = Infinity;
+    if (street.type === "landmark") {
+      distance = isPointInPolygon(latlng, segment)
+        ? 0
+        : calculateDistanceToPolygon(latlng, segment, map);
+    } else {
+      distance = calculateDistanceToPolyline([latlng.lat, latlng.lng], segment);
+    }
+    if (distance < minDistance) {
+      minDistance = distance;
+    }
+  });
+
+  return minDistance;
 };
 
 export const isPointInPolygon = (

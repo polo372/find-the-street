@@ -16,6 +16,12 @@ if (banner) {
         <option value="">--Merci de choisir votre secteur--</option>
         ${selectOptions}
       </select>
+      <label for="difficulty-select">Difficulté</label>
+      <select name="difficulty" id="difficulty-select">
+        <option value="easy">Facile (Grands axes)</option>
+        <option value="medium" selected>Moyen (Intermédiaire)</option>
+        <option value="hard">Difficile (Toutes les rues)</option>
+      </select>
       <button id="startGame">Démarrer le jeu</button>
     </div>
   `;
@@ -23,9 +29,13 @@ if (banner) {
   document.getElementById("startGame")?.addEventListener("click", () => {
     const select = document.getElementById("town-select") as HTMLSelectElement;
     const value = select.value;
+    const difficultySelect = document.getElementById(
+      "difficulty-select"
+    ) as HTMLSelectElement;
+    const difficulty = difficultySelect.value;
     if (value) {
       document.getElementById("start-container")?.classList.add("hidden");
-      startGame(value);
+      startGame(value, difficulty);
     } else {
       alert("Veuillez sélectionner un secteur");
     }
