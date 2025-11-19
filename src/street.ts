@@ -24,10 +24,11 @@ export const clearStreets = (): void => {
 };
 
 export const initializeStreetForCity = async (
-  firehouseName: string
+  firehouseName: string,
+  difficulty: string = "medium"
 ): Promise<void> => {
   if (streets.length) return;
-  const cacheKey = `streets_${firehouseName}`;
+  const cacheKey = `streets_${firehouseName}_${difficulty}`;
   const cachedData = localStorage.getItem(cacheKey);
 
   if (cachedData) {
@@ -40,12 +41,32 @@ export const initializeStreetForCity = async (
     (firehouse: { name: string; polygon: string }) =>
       firehouse.name === firehouseName
   )?.polygon;
-  const query = `
-  [out:json];
-(
+
+  // Build highway queries based on difficulty
+  let highwayQueries = "";
+  if (difficulty === "easy") {
+    highwayQueries = `
+  way["highway"="primary"](poly: "${firehousePolygon}");
+  way["highway"="secondary"](poly: "${firehousePolygon}");`;
+  } else if (difficulty === "medium") {
+    highwayQueries = `
+  way["highway"="primary"](poly: "${firehousePolygon}");
+  way["highway"="secondary"](poly: "${firehousePolygon}");
+  way["highway"="tertiary"](poly: "${firehousePolygon}");`;
+  } else {
+    // hard - include all street types
+    highwayQueries = `
   way["highway"="primary"](poly: "${firehousePolygon}");
   way["highway"="secondary"](poly: "${firehousePolygon}");
   way["highway"="tertiary"](poly: "${firehousePolygon}");
+  way["highway"="residential"](poly: "${firehousePolygon}");
+  way["highway"="living_street"](poly: "${firehousePolygon}");
+  way["highway"="unclassified"](poly: "${firehousePolygon}");`;
+  }
+
+  const query = `
+  [out:json];
+(${highwayQueries}
 
   // Mairie
   node["amenity"="townhall"](poly: "${firehousePolygon}");
