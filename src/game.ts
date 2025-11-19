@@ -14,6 +14,7 @@ import {
   getRandomStreets,
   initializeStreetForCity,
   Street,
+  clearStreets,
 } from "./street";
 import { createProgress, deleteProgress, updateProgress } from "./progress";
 
@@ -27,12 +28,15 @@ const options = {
 let score = 0;
 let streetsToFind: Street[] = [];
 
-export const startGame = async (): Promise<void> => {
+export const startGame = async (firehouseName: string): Promise<void> => {
   // Initialize game variables
   score = 0;
   streetsToFind = [];
+  options.firehouseName = firehouseName;
 
-  deleteStartButton();
+  options.firehouseName = firehouseName;
+
+  clearStreets();
   await initializeStreetForCity(options.firehouseName);
   streetsToFind = getRandomStreets(options.maxTurns);
   console.log(streetsToFind);
@@ -56,22 +60,19 @@ export const startGame = async (): Promise<void> => {
   nextTurn();
 };
 
-const createStartButton = (): void => {
-  const startButton = document.createElement("button");
-  startButton.innerHTML = "Démarrer le jeu";
-  startButton.setAttribute("id", "startGame");
-  document.getElementById("banner")?.append(startButton);
-  startButton.addEventListener("click", () => startGame());
-};
-const deleteStartButton = (): void => {
-  document.getElementById("startGame")?.remove();
-};
+
 
 const nextTurn = (): void => {
   deleteStreet();
   deleteMap();
   deleteTimer();
   deleteTurnResult();
+  deleteRound();
+
+  const round = options.maxTurns - streetsToFind.length + 1;
+  if (round <= options.maxTurns) {
+    displayRound(round, options.maxTurns);
+  }
 
   const street = streetsToFind.shift();
   if (street) {
@@ -99,8 +100,9 @@ export const endGame = (): void => {
   deleteTurnResult();
   deleteProgress();
   deleteScore();
+  deleteRound();
   displayFinalScore();
-  createStartButton();
+  document.getElementById("start-container")?.classList.remove("hidden");
 };
 
 export const displayScore = () => {
@@ -112,6 +114,18 @@ export const displayScore = () => {
 };
 const deleteScore = (): void => {
   document.getElementById("score")?.remove();
+};
+
+const displayRound = (current: number, total: number) => {
+  deleteRound();
+  const roundDiv = document.createElement("div");
+  roundDiv.innerHTML = `Tour: ${current} / ${total}`;
+  roundDiv.setAttribute("id", "round");
+  document.getElementById("banner")?.append(roundDiv);
+};
+
+const deleteRound = (): void => {
+  document.getElementById("round")?.remove();
 };
 
 const startTimer = (map: Map, street: Street): NodeJS.Timeout => {

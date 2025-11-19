@@ -19,6 +19,10 @@ export type Bounds = {
 
 export let streets: Street[] = [];
 
+export const clearStreets = (): void => {
+  streets = [];
+};
+
 export const initializeStreetForCity = async (
   firehouseName: string
 ): Promise<void> => {

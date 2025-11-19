@@ -141,3 +141,7 @@ button:focus-visible {
   background-repeat: no-repeat;
   margin-left: 10px;
 }
+
+.hidden {
+  display: none !important;
+}
