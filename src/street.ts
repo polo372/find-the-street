@@ -27,6 +27,15 @@ export const initializeStreetForCity = async (
   firehouseName: string
 ): Promise<void> => {
   if (streets.length) return;
+  const cacheKey = `streets_${firehouseName}`;
+  const cachedData = localStorage.getItem(cacheKey);
+
+  if (cachedData) {
+    const parsedData = JSON.parse(cachedData);
+    streets = parsedData;
+    return;
+  }
+
   const firehousePolygon = firehouses.find(
     (firehouse: { name: string; polygon: string }) =>
       firehouse.name === firehouseName
@@ -132,6 +141,7 @@ out skel qt;
     });
 
   streets = Array.from(streetMap.values());
+  localStorage.setItem(cacheKey, JSON.stringify(streets));
 };
 
 export const getRandomStreets = (count: number): Street[] => {

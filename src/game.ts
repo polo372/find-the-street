@@ -17,6 +17,7 @@ import {
   clearStreets,
 } from "./street";
 import { createProgress, deleteProgress, updateProgress } from "./progress";
+import { showTurnResult, triggerConfetti } from "./ui";
 
 const options = {
   maxTurns: 10,
@@ -139,6 +140,9 @@ const startTimer = (map: Map, street: Street): NodeJS.Timeout => {
   const interval = setInterval(() => {
     timeLeft--;
     timer.innerHTML = `Temps restant: ${timeLeft}`;
+    if (timeLeft <= 10) {
+      timer.classList.add("urgent");
+    }
     if (timeLeft === 0) {
       clearInterval(interval);
       checkAnswer(map, street);
@@ -156,26 +160,35 @@ const checkAnswer = (
   street?: Street,
   event?: L.LeafletMouseEvent
 ): void => {
+  let isCorrect = false;
+  let distance = 0;
+  let points = 0;
+
   if (!event) {
     displayTimeoutTurnResult();
   } else if (street) {
     displayClickPoint(event, map);
     const latlng = event.latlng;
-    const distance = calculateDistanceToStreetOrLandmark(latlng, street, map);
-    const isCorrect = distance <= 50;
-    const points = calculatePoints(distance, isCorrect);
+    distance = calculateDistanceToStreetOrLandmark(latlng, street, map);
+    isCorrect = distance <= 50;
+    points = calculatePoints(distance, isCorrect);
     score += points;
-    displayTurnResult(isCorrect, distance);
   }
   if (street) {
     showCorrectPosition(street, map);
     displayScore();
-    updateProgress(options.maxTurns - streetsToFind.length, options.maxTurns);
-    if (streetsToFind.length === 0) {
-      displayEndGame();
-    } else {
-      displayNextQuestion();
+    if (isCorrect) {
+      triggerConfetti();
     }
+    showTurnResult(isCorrect, distance, points, () => {
+      updateProgress(options.maxTurns - streetsToFind.length, options.maxTurns);
+      if (streetsToFind.length === 0) {
+        displayEndGame();
+      } else {
+        deleteScore();
+        nextTurn();
+      }
+    });
   }
 };
 
@@ -186,19 +199,7 @@ const displayTimeoutTurnResult = (): void => {
   result.innerHTML = "Temps écoulé!";
   document.getElementById("banner")?.append(result);
 };
-const displayTurnResult = (isCorrect: boolean, distance: number): void => {
-  deleteTurnResult();
-  const result = document.createElement("div");
-  result.setAttribute("id", "result");
-  if (isCorrect) {
-    result.innerHTML = "Correct! Bien joué!";
-  } else {
-    result.innerHTML = `Incorrect! La rue ou lieu se trouve à environ ${Math.round(
-      distance
-    )} mètres d'ici.`;
-  }
-  document.getElementById("banner")?.append(result);
-};
+
 
 const displayEndGame = () => {
   const endGameButton = document.createElement("button");
@@ -211,17 +212,7 @@ const displayEndGame = () => {
   });
 };
 
-const displayNextQuestion = () => {
-  const nextButton = document.createElement("button");
-  nextButton.innerHTML = "Continuer avec la rue suivante";
-  nextButton.setAttribute("id", "nextQuestion");
-  document.getElementById("banner")?.append(nextButton);
-  nextButton.addEventListener("click", () => {
-    nextButton.remove();
-    deleteScore();
-    nextTurn();
-  });
-};
+
 
 const displayFinalScore = () => {
   const finalScore = document.createElement("div");
