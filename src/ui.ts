@@ -18,6 +18,8 @@ export const showTurnResult = (
     const message = document.createElement("p");
     if (isCorrect) {
         message.innerHTML = `Vous avez trouvé l'emplacement exact !<br>+${points} points`;
+    } else if (distance === 0 && points === 0) {
+        message.innerHTML = `Temps écoulé !<br>+${points} points`;
     } else {
         message.innerHTML = `Vous étiez à <strong>${Math.round(
             distance
